@@ -7,8 +7,12 @@
 	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 	<title>CoCal</title>
 
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
 	<!-- Bootstrap -->
 	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<script src="js/bootstrap.min.js"></script>
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -17,8 +21,9 @@
 		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
 
-	<link href="css/cocal.css" rel="stylesheet">
 
+	<!-- CoCal -->
+	<link href="css/cocal.css" rel="stylesheet">
 	<script src="js/cocal.js"></script>
 	<script>
 		var cocal_proxy_url = "<?php echo(((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME']); ?>";
@@ -68,10 +73,16 @@
 				</div>
 				<div class="form-group">
 					<div class="col-sm-offset-2 col-sm-10">
-						<button type="submit" class="btn btn-default" onclick="cocal_encode_url()">URL generieren</button>
+						<button type="submit" class="btn btn-default">URL generieren</button>
 					</div>
 				</div>
 			</form>
+			<script>
+				$('#cocal_generator').submit(function () {
+					cocal_encode_url();
+					return false;
+				});
+			</script>
 
 			<div id="generator_url" class="hidden">
 				<p class="bg-info text-center cocal-url">
@@ -84,11 +95,5 @@
 		</div>
 
 	</div>
-
-
-	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<!-- Include all compiled plugins (below), or include individual files as needed -->
-	<script src="js/bootstrap.min.js"></script>
 </body>
 </html>
