@@ -211,7 +211,7 @@ if (isset($matrnr) && isset($passwd)) {
 
 				case 'CATEGORIES':
 					$category = $value;
-					
+
 
 				case 'LOCATION':
 					$matches = array();
@@ -245,7 +245,7 @@ if (isset($matrnr) && isset($passwd)) {
 
 					if (@$address['cluster'])
 						$value .= '\nCampus: ' . preg_replace('/^Campus /', '', $address['cluster']);
-						
+
 					if (@$category)
 						$value .= '\nTyp: ' . $category;
 
@@ -266,104 +266,6 @@ if (isset($matrnr) && isset($passwd)) {
 	$db->close();
 }
 else {
-	echo '<?xml version="1.0" ?>';
-?>
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-<head>
-	<title>/dev/nulll - CampusOffice to Google Sync</title>
-	<script src="../jquery-1.7.2.min.js" type="text/javascript"></script>
-	<script src="../scripts.js" type="text/javascript"></script>
-	<script src="../base64.js" type="text/javascript"></script>
-	<script type="text/javascript">
-		function unique(length) {
-			var chars = "0123456789abcdefghiklmnopqrstuvwxyz";
-			var string = '';
-
-			while (length--) {
-				var rnum = Math.floor(Math.random() * chars.length);
-				string += chars.substring(rnum,rnum+1);
-			}
-
-			return string;
-		}
-
-		function encode() {
-			var cipher = $('#matrnr').val() + ':' + $('#passwd').val();
-			var link = '<?php echo $scriptUrl ?>?hash=' + Base64.encode(cipher);
-
-			$('#result a').attr('href', link);
-			$('#result a').text(link);
-			$('#result').show(300);
-
-			return;
-
-			/* we dont want to store your credentials ;-) sorry for these ugly links */
-			$.ajax({
-				url : 'http://d.0l.de/add.json',
-				data : {
-					rdata : encodeURI(link),
-					host : unique(24),
-					type : 'URL',
-					pw : $('#passwd').val()
-				},
-				dataType : 'jsonp',
-				success : function(data) {
-					$(data).each(function(index, value) {
-						if (value.type == 'success' && value.description == 'uri redirection added to db') {
-							var host = value.data[0].host.punycode;
-							var zone = value.data[0].host.zone.name;
-							var link = 'http://' + host + '.' + zone;
-
-							$('#result a').attr('href', link);
-				                        $('#result a').text(link);
-							$('#result').show(300);
-						}
-					});
-				}
-
-			});
-		}
-	</script>
-	<link rel="stylesheet" type="text/css" href="../style.css">
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<link rel="shortcut icon" href="/favicon.png" type="image/png">
-	<link rel="icon" href="/favicon.png" type="image/png">
-</head>
-<body>
-
-<div id="content">
-	<header>
-		<a href="http://dev.0l.de"><img src="http://dev.0l.de/_media/nulll_small.png" alt="0l" /></a>
-		<h1>CampusOffice to Google Sync</h1>
-	</header>
-
-	<table style="width: 330px; margin: 10px auto;">
-		<tr>
-			<td><label for="matrnr">Matrikel-Nr:</label></td>
-			<td><input id="matrnr" type="text" name="u" /></td>
-		</tr>
-		<tr>
-			<td><label for="passwd">Passwort:</label></td>
-			<td><input id="passwd" type="password" name="p" /></td>
-		</tr>
-	</table>
-
-	<input type="button" onclick="encode()" value="Get Calendar!" />
-
-	<p id="result" style="display: none">
-		<span>Das ist der fertige Link:</span><br />
-		<a href=""></a>
-	</p>
-
-	<footer>
-		<p>by <a href="http://www.steffenvogel.de">Steffen Vogel</a> - <a href="http://dev.0l.de/tools/campus">help</a></p>
-	</footer>
-</div>
-</body>
-</html>
-
-<?php
+	echo 'Invalid URL\n';
 }
 ?>
