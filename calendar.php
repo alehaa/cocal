@@ -129,15 +129,11 @@ function error() {
 if (!empty($_GET['hash'])) {
 	$cipher = base64_decode($_GET['hash']);
 	if (strpos($cipher, ':')) {
-		list($matrnr, $passwd) = explode(':', $cipher);
+		list($user, $passwd) = explode(':', $cipher);
 	}
 }
-else if (!empty($_GET['u']) && !empty($_GET['p'])) {
-	$matrnr = $_GET['u'];
-	$passwd = $_GET['p'];
-}
 
-if (isset($matrnr) && isset($passwd)) {
+if (isset($user) && isset($passwd)) {
 	/* perform login to get session cookie */
 	$cookieFile = tempnam(sys_get_temp_dir(), 'campus_');
 
@@ -155,7 +151,7 @@ if (isset($matrnr) && isset($passwd)) {
 	$loginParams = array(
 		'login'		=> urlencode('> Login'),
 		'p'		=> urlencode($passwd),
-		'u'		=> urlencode($matrnr)
+		'u'		=> urlencode($user)
 	);
 
 	curl_request('POST', $baseUrl . $loginPath, $cookieFile, $loginParams);
@@ -182,7 +178,7 @@ if (isset($matrnr) && isset($passwd)) {
 
 		switch($key) {
 			case 'Content-Disposition':
-				$value = 'attachment; filename=campus_office_' . $matrnr . '.ics';
+				$value = 'attachment; filename=campus_office_' . $user . '.ics';
 				break;
 			case 'Content-Type':
 				$value .= '; charset=utf-8';
@@ -266,6 +262,6 @@ if (isset($matrnr) && isset($passwd)) {
 	$db->close();
 }
 else {
-	echo 'Invalid URL\n';
+	echo "Invalid URL\n";
 }
 ?>

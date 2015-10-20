@@ -3,7 +3,7 @@ function cocal_encode_url() {
 	var campus_login_hash = btoa($('#cocal_user').val() + ':' + $('#cocal_pass').val());
 
 	// generate complete URL
-	var url = cocal_proxy_url + "/calendar.php?co=" + $('#cocal_url').val() + "&login=" + campus_login_hash;
+	var url = cocal_proxy_url + "/calendar.php?co=" + $('#cocal_url').val() + "&hash=" + campus_login_hash;
 
 	// show URL in infobox
 	$('#generator_url_link').attr("href", url);
