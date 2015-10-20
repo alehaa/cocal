@@ -1,267 +1,170 @@
 <?php
 
-/* Constants */
-$scriptUrl = ((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF'];
-$baseUrl = 'https://www.campus.rwth-aachen.de/';
-$homePath = 'office/default.asp';
-$loginPath = 'office/views/campus/redirect.asp';
-$calPath = 'office/views/calendar/iCalExport.asp';
-$logoutPath = 'office/system/login/logoff.asp';
-$roomPath = 'rwth/all/room.asp';
+/*
+ * helper functions
+ */
 
-/* Functions */
-function curl_fixcookie($cookieFile) {
-	$contents = file_get_contents($cookieFile);
-	$lines = explode("\n", $contents);
-
-	foreach ($lines as $i => $line) {
-		if (strpos($line, "#HttpOnly_") === 0) {
-			$lines[$i] = substr($line, strlen("#HttpOnly_"));
-		}
-	}
-
-	$contents = implode("\n", $lines);
-	file_put_contents($cookieFile, $contents);
-}
-
-function curl_request($method, $url, $cookieFile = false, $params = array()) {
-	$ch = curl_init();
-
-	$options = array(
-		CURLOPT_URL		=> $url,
-		CURLOPT_FOLLOWLOCATION	=> true,
-		CURLOPT_RETURNTRANSFER	=> true,
-		CURLOPT_HEADER		=> true
+/** \brief Print an error message and exit PHP script.
+ *
+ * \param errno HTTP Error code.
+ * \param errormsg Optional error message to be displayed in error.php.
+ *
+ * \return This function never returns.
+ */
+function error($errno, $errormsg = NULL)
+{
+	$err_string = array(
+		400 => "Bad Request",
+		500 => "Internal Server Error"
 	);
 
-	if ($cookieFile) {
-		$options[CURLOPT_COOKIEFILE] = $cookieFile;
-		$options[CURLOPT_COOKIEJAR] = $cookieFile;
-	}
+	// set HTTP header for error message
+	if (isset($err_string[$errno]))
+		header("HTTP/1.0 $errno ".$err_string[$errno]);
 
-	array_walk($params, function(&$value, $key) { $value = $key . '=' . $value; });
-
-	if ($params && strtolower($method) == 'post') {
-		$options[CURLOPT_POST] = true;
-		$options[CURLOPT_POSTFIELDS] = implode("&", $params);
-	}
-	else if ($params) { /* assuming default mehtod: GET */
-		$options[CURLOPT_URL] .= '?' . implode('&', $params);
-	}
-
-	curl_setopt_array($ch, $options);
-	$output = curl_exec($ch);
-	curl_close($ch);
-
-	if ($cookieFile) {
-		curl_fixcookie($cookieFile);
-	}
-
-	return $output;
-}
-
-function get_address($db, $room) {
-	return $db->querySingle('SELECT * FROM rooms WHERE id = "' . $db->escapeString($room). '";', true);
-}
-
-function set_address($db, $room, $address) {
-	$db->exec('INSERT OR REPLACE INTO rooms VALUES (
-			"' . $db->escapeString($room) . '",
-			"' . $db->escapeString(@$address['address']) . '",
-			"' . $db->escapeString(@$address['cluster']) . '",
-			"' . $db->escapeString(@$address['building']) . '",
-			"' . $db->escapeString(@$address['building_no']) . '",
-			"' . $db->escapeString(@$address['room']) . '",
-			"' . $db->escapeString(@$address['room_no']) . '",
-			"' . $db->escapeString(@$address['floor']) . '"
-		);');
-}
-
-function crawl_address($room) {
-	global $baseUrl, $roomPath;
-
-	$matches = array();
-	$response = curl_request('GET', $baseUrl . $roomPath . '?room=' . urlencode($room));
-
-	$infos = array(
-		'cluster' => 'H.rsaalgruppe',
-		'address' => 'Geb.udeanschrift',
-		'building' => 'Geb.udebezeichung',
-		'building_no' => 'Geb.udenummer',
-		'room' => 'Raumname',
-		'room_no' => 'Raumnummer',
-		'floor' => 'Geschoss'
-	);
-
-	foreach ($infos as $index => $pattern) {
-		$match = array();
-
-		if (preg_match('/<td class="default">' . $pattern . '<\/td><td class="default">([^<]*)<\/td>/', $response, $match)) {
-			$matches[$index] = preg_replace('/[ ]{2,}/sm', ' ', utf8_encode($match[1]));
-		}
-	}
-
-	return (count($matches)) ? $matches : false;
-}
-
-/* send HTTP 500 for Google to stop fetching */
-function error() {
-	global $scriptUrl;
-
-	header("HTTP/1.0 500 Internal Server Error");
-	echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-		<html>
-			<head>
-				<meta http-equiv="REFRESH" content="5;url=' . $scriptUrl . '">
-				<link rel="stylesheet" type="text/css" href="style.css">
-				<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-				<link rel="shortcut icon" href="/favicon.png" type="image/png">
-				<link rel="icon" href="/favicon.png" type="image/png">
-			</head>
-			<body>
-				<div id="content"><h2>Sorry an error occured!<br />Check your credentials and try again!</h2></div>
-			</body>
-		</html>';
+	include("error.php");
 	die();
 }
 
-/* Code */
-if (!empty($_GET['hash'])) {
-	$cipher = base64_decode($_GET['hash']);
-	if (strpos($cipher, ':')) {
-		list($user, $passwd) = explode(':', $cipher);
-	}
-}
 
-if (isset($user) && isset($passwd)) {
-	/* perform login to get session cookie */
-	$cookieFile = tempnam(sys_get_temp_dir(), 'campus_');
+/** \brief Reset cURL handle and set default options.
+ *
+ * \return Returns nothing on success. Otherwise an error message will be
+ *  displayed and PHP dies.
+ */
+function curl_reset_handle($curl_handle)
+{
+	// reset cURL handle
+	curl_reset($curl_handle);
 
-	/* open database */
-	$db = new SQLite3('cocal.db', SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
-
-	/* check schema */
-	$result = $db->querySingle('SELECT name FROM sqlite_master WHERE type="table" AND name="rooms";');
-	if (!$result) {
-		$db->exec('create table rooms (id VARCHAR(255) PRIMARY KEY, address VARCHAR(255), cluster VARCHAR(255), building VARCHAR(255), building_no INTEGER, room VARCHAR(255), room_no INTEGER, floor VARCHAR(255));');
-	}
-
-	curl_request('GET', $baseUrl . $homePath, $cookieFile);
-
-	$loginParams = array(
-		'login'		=> urlencode('> Login'),
-		'p'		=> urlencode($passwd),
-		'u'		=> urlencode($user)
+	// enable cookie engine
+	$options = array(
+		CURLOPT_COOKIESESSION => true,
+		CURLOPT_COOKIEJAR => "/dev/null"
 	);
 
-	curl_request('POST', $baseUrl . $loginPath, $cookieFile, $loginParams);
+	if (!curl_setopt_array($curl_handle, $options))
+		error(500, "cURL Cookie-engine konnte nicht initialisiert werden.");
+}
 
-	/* request calendar */
-	$calParams = array(
-		'startdt'	=> strftime('%d.%m.%Y', time() - 7*24*60*60), /* eine Woche Vergangenheit */
-		'enddt'		=> strftime('%d.%m.%Y', time() + 6*31*24*60*60) /* halbes Jahr ZUukunft */
+
+/** \brief Perform a cURL request.
+ *
+ * \param curl_handle cURL handle.
+ * \param url URL for request to be performed.
+ * \param method HTTP request method (GET or POST).
+ * \param params Optional parameters for GET and POST reqests.
+ *
+ * \return On success the requested data will be returned. On failure an error
+ *  message will be displayed and PHP dies.
+ */
+function curl_request($curl_handle, $url, $method = "GET", $params = array())
+{
+	// reset cURL handle
+	curl_reset_handle($curl_handle);
+
+	// convert params
+	$param_string = "";
+	foreach($params as $key => $value)
+		$param_string .= $key.'='.urlencode($value).'&';
+
+	rtrim($param_string, '&');
+
+	// set cURL options
+	$options = array(
+		CURLOPT_URL => $url,
+		CURLOPT_FOLLOWLOCATION => true,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_HEADER => true
 	);
 
-	$response = curl_request('GET', $baseUrl . $calPath, $cookieFile, $calParams);
+	// set params for method
+	if ($method == "POST") {
+		$options[CURLOPT_POST] = count($params);
+		$options[CURLOPT_POSTFIELDS] = $param_string;
 
-	/* filter some changes */
-	list($headers, $body) = explode("\r\n\r\n", $response, 2);
-
-	if (substr($body, 0, strlen("BEGIN:VCALENDAR")) != "BEGIN:VCALENDAR") {
-		error();
+	} else if ($method == "GET") {
+		$options[CURLOPT_URL] .= "?".$param_string;
 	}
 
-	/* header pass through */
-	$headers = array_slice(explode("\r\n", $headers), 1);
-	foreach ($headers as $header) {
-		list($key, $value) = explode(": ", $header);
+	// set all options
+	echo "<pre>";
+	print_r($options);
+	echo "</pre>";
 
-		switch($key) {
-			case 'Content-Disposition':
-				$value = 'attachment; filename=campus_office_' . $user . '.ics';
-				break;
-			case 'Content-Type':
-				$value .= '; charset=utf-8';
-			break;
-		}
+	if (!curl_setopt_array($curl_handle, $options))
+		error(500, "cURL optionen konnten nicht gesetzt werden.");
 
-		if ($key != 'Content-Length') { // ignore old length
-			header($key . ': ' . $value);
-		}
-	}
+	// execute request
+	$result = curl_exec($curl_handle);
+	if ($result == false)
+		error(500, "Fehler bei der Kommunikation mit CAMPUS office.");
 
-	$address = array();
-	$category = '';
-	$lines = explode("\r\n", $body);
-	foreach ($lines as $line) {
-		if ($line) {
-			list($key, $value) = explode(":", $line);
-			switch ($key) {
-				case 'END':
-					if ($value == 'VEVENT') {
-						flush();
-						$address = array();
-						$category = '';
-					}
-					break;
-
-				case 'CATEGORIES':
-					$category = $value;
-
-
-				case 'LOCATION':
-					$matches = array();
-					if (preg_match('/^([0-9]+\|[0-9]+)/', $value, $matches)) {
-						$room = $matches[1];
-						$address = get_address($db, $room);
-
-						if (empty($address)) {
-							$address = crawl_address($room);
-							set_address($db, $room, $address);
-						}
-
-						if (isset($address['address'])) {
-							$value = $address['address'] . ', Aachen';
-						}
-					}
-					break;
-
-				case 'DESCRIPTION':
-					$additional = $value;
-					$value = '';
-
-					if (@$address['building'] || @$address['building_no'])
-						$value .= '\nGebäude: ' . $address['building_no'] . ' ' . $address['building'];
-
-					if (@$address['room'] || @$address['room_no'])
-						$value .= '\nRaum: ' . $address['room_no'] . ' ' . $address['room'];
-
-					if (@$address['floor'])
-						$value .= '\nGeschoss: ' . $address['floor'];
-
-					if (@$address['cluster'])
-						$value .= '\nCampus: ' . preg_replace('/^Campus /', '', $address['cluster']);
-
-					if (@$category)
-						$value .= '\nTyp: ' . $category;
-
-					if ($additional && $additional != 'Kommentar')
-						$value .= '\n' . $additional;
-
-					$value = preg_replace('/^\\\n/', '', $value);
-
-					break;
-			}
-			echo $key . ':' . trim($value);
-		}
-		echo "\r\n";
-	}
-
-	/* cleanup */
-	unlink($cookieFile);
-	$db->close();
+	return $result;
 }
-else {
-	echo "Invalid URL\n";
-}
-?>
+
+
+
+/*
+ * Implementation
+ */
+
+/* Decode hash.
+ * Hash is in HTML BASIC auth format base64(user:pass).
+ */
+if (!isset($_GET['hash']) || empty($_GET['hash']))
+	error(400, "Parameter 'hash' nicht angegeben!");
+
+$cipher = base64_decode($_GET['hash']);
+if (!strpos($cipher, ':'))
+	error(400, "Hash ist ung&uuml;ltig!");
+
+list($campus_user, $campus_passwd) = explode(':', $cipher);
+unset($cipher);
+
+
+/* Build CAMPUS office base URL with GET variable co. Per default HTTPS is used,
+ * which should not be changed.
+ */
+if (!isset($_GET['co']))
+	error(400, "Parameter 'co' nicht angegeben!");
+
+$campus_url = "https://".$_GET['co'];
+
+
+// init cURL handle.
+$ch = curl_init();
+if ($ch == false)
+	error(500, "cURL konnte nicht initialisiert werden.");
+
+
+
+/* Login user in CAMPUS office. This login may differ from site to site, so this
+ * login is specific for the FH Aachen University of applied sciences.
+ */
+$login = array(
+	"u" => $campus_user,
+	"p" => $campus_passwd,
+	"login" => "Login"
+);
+curl_request($ch, $campus_url."/views/campus/search.asp", "POST", $login);
+
+
+/* Request calendar.
+ * Default timeslot is 1 week in past and half year in future.
+ */
+date_default_timezone_set("Europe/Berlin");
+$calParams = array(
+	"startdt" => strftime("%d.%m.%Y", time() - 7*24*60*60),
+	"enddt"   => strftime("%d.%m.%Y %H:%M:%S", time() + 6*31*24*60*60)
+);
+
+$calendar = curl_request($ch, $campus_url."/views/calendar/iCalExport.asp",
+                         "GET", $calParams);
+
+// print calendar
+header("Content-type: text/calendar; charset=utf-8");
+header("Content-Disposition: inline; filename=calendar.ics");
+echo($calendar);
+
+ ?>
