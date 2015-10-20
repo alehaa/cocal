@@ -38,6 +38,8 @@
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
+					<li><a href="#home">Home</a></li>
+					<li><a href="#security">Sicherheit</a></li>
 					<li><a href="#generator">Get Calendar!</a></li>
 				</ul>
 			</div>
@@ -45,55 +47,113 @@
 	</nav>
 
 	<div class="container">
+		<h1 id="home">CoCal <small>CAMPUS-Office Kalender Sync Service</small></h1>
+		<p>
+			F&uuml;r die einfache Integration von CAMPUS-Office in deinen
+			Kalender kannst du jetzt einfach den CoCal nutzen um dir den
+			Kalender als iCal Kalender-Abonnement zu abonnieren. &Auml;nderungen
+			im CAMPUS-Office Kalender werden sofort bei der n&auml;chsten
+			Synchronisierung &uuml;bernommen. So beh&auml;ltst du immer den
+			&Uuml;berblick &uuml;ber deine aktuellen Veranstaltungen.
+		</p>
 
-		<div id="generator">
-			<h1>URL generieren</h1>
 
-			<p class="lead">
-				F&uuml;lle einfach das folgende Formular aus, um deine URL zu generieren.
-			</p>
+		<h1 id="security">Sicherheit</h1>
+		<p>
+			Der generierte Link ist f&uuml;r dich <b>pers&ouml;nlich</b>
+			gedacht. Er enth&auml;lt deine pers&ouml;nlichen CAMPUS-Office
+			Anmeldedaten und gew&auml;hrt jedem Zugriff auf deinen CAMPUS-Office
+			Account. Bewahre ihn daher sicher auf, oder generiere ihn am besten
+			nur, wenn du ihn gerade brauchst und schreibe ihn nicht auf.
+		</p>
+		<p>
+			Solltest du den Link versehentlich weitergegeben haben oder ein
+			Ger&auml;t mit installiertem CoCal-Abo verloren haben, so solltest
+			du <b>umgehend</b> dein CAMPUS-Passwort &auml;ndern.
+		</p>
 
-			<form class="form-horizontal" id="cocal_generator">
-				<div class="form-group">
-					<label for="cocal_url" class="col-sm-2 control-label">Campus URL</label>
-					<div class="col-sm-10">
-						<input type="url" class="form-control" id="cocal_url" placeholder="campus.deineuni.de">
-					</div>
+		<h2>Datenschutz</h2>
+		<p>
+			Auf dem CoCal Server werden keine Passwort-Hashes gespeichert. Auch
+			wenn von diesem Server Daten geklaut werden, kann dein Passwort also
+			nicht geklaut werden.<br/>
+
+			Wenn du dem Admin des Servers jedoch nicht traust, dass er
+			sorgf&auml;ltig mit deinen Daten umgeht, kannst du CoCal auch
+			einfach <a href="https://github.com/alehaa/cocal">auf deinem
+			eigenen Server hosten.</a>
+		</p>
+
+
+		<h1 id="generator">CoCal nutzen</h1>
+		<p>
+			Du willst CoCal nutzen? F&uuml;lle einfach das folgende Formular
+			aus, um deine URL zu generieren.
+		</p>
+
+		<form class="form-horizontal" id="cocal_generator">
+			<div class="form-group">
+				<label for="cocal_url" class="col-sm-2 control-label">Campus URL</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="cocal_url" placeholder="campus.deineuni.de" <?php if(isset($_GET['co'])) echo "value=\"".$_GET['co']."\"";?>>
 				</div>
-				<div class="form-group">
-					<label for="cocal_user" class="col-sm-2 control-label">Benutzername</label>
-					<div class="col-sm-4">
-						<input type="text" class="form-control" id="cocal_user" placeholder="Campus Benutzername">
-					</div>
-
-					<label for="cocal_pass" class="col-sm-2 control-label">Passwort</label>
-					<div class="col-sm-4">
-						<input type="password" class="form-control" id="cocal_pass" placeholder="Campus Passwort">
-					</div>
-				</div>
-				<div class="form-group">
-					<div class="col-sm-offset-2 col-sm-10">
-						<button type="submit" class="btn btn-default">URL generieren</button>
-					</div>
-				</div>
-			</form>
-			<script>
-				$('#cocal_generator').submit(function () {
-					cocal_encode_url();
-					return false;
-				});
-			</script>
-
-			<div id="generator_url" class="hidden">
-				<p class="bg-info text-center cocal-url">
-					Dein pers&ouml;nlicher Link f&uuml;r dein Kalender-Abonement:<br/>
-					<a id="generator_url_link"></a><br/>
-					<br/>
-					<b>Achtung:</b> Gebe diesen Link an <b>niemanden</b> weiter, da er deine pers&ouml;nlichen CAMPUS-Anmeldedaten enhth&auml;lt!
-				</p>
 			</div>
+			<div class="form-group">
+				<label for="cocal_user" class="col-sm-2 control-label">Benutzername</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="cocal_user" placeholder="Campus Benutzername">
+				</div>
+
+				<label for="cocal_pass" class="col-sm-2 control-label">Passwort</label>
+				<div class="col-sm-4">
+					<input type="password" class="form-control" id="cocal_pass" placeholder="Campus Passwort">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-default">URL generieren</button>
+				</div>
+			</div>
+		</form>
+		<script>
+			$('#cocal_generator').submit(function () {
+				cocal_encode_url();
+				return false;
+			});
+		</script>
+
+		<div id="generator_url" class="hidden">
+			<p class="bg-info text-center cocal-url">
+				Dein pers&ouml;nlicher Link f&uuml;r dein Kalender-Abonement:<br/>
+				<a id="generator_url_link"></a><br/>
+				<br/>
+				<b>Achtung:</b> Gebe diesen Link an <b>niemanden</b> weiter, da
+				er deine pers&ouml;nlichen CAMPUS-Anmeldedaten enth&auml;lt!
+			</p>
 		</div>
 
+		<p>
+			Den generierten Link kannst du in die meisten g&auml;ngigen
+			Kalender-Programme, aber auch Online-Dienste wie Google Calendar
+			als sogenanntes Kalender-Abonnement einbinden.
+		</p>
+
+
+		<h1 id="contribute">Mitwirken</h1>
+		<p>
+			CoCal wurde von <a href="http://www.steffenvogel.de">Steffen Vogel</a>
+			und <a href="https://github.com/alehaa">Alexander Haase</a>
+			geschrieben.
+		</p>
+		<p>
+			Wenn du auch mit aufgelistet werden willst, ist das ganz einfach:
+			CoCal ist unter der freien
+			<a href="http://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a>
+			lizenziert. Das bedeutet, dass du ganz einfach &Auml;nderungen an
+			CoCal vornehmen kannst, oder es nach deinen w&uuml;nschen anpassen
+			kannst. Weitere Infos dazu findest du in unserem
+			<a href="https://github.com/alehaa/cocal">git auf github.com</a>
+		</p>
 	</div>
 </body>
 </html>
