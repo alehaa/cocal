@@ -17,6 +17,8 @@ Bei der Einrichtung deines vHosts für CoCal solltest du zwei Dinge beachten:
 1. Nutze TLS! Bei jeder Synchronisation werden Anmeldedaten übergeben, also solltest du die Daten deiner Benutzer entsprechend absichern. Eine Nutzung über unverschlüsseltes HTTP solltest du nicht anbieten.
 2. Schalte das Logging für URL-Parameter ab! Die Anmeldedaten werden als URL-Parameter übergeben, also sollten diese nicht in irgendwelchen Logs abgespeichert sein.
 
+Zudem solltest du die IP der Nutzer anonymisieren oder gar nicht loggen, da dies sonst gegen §15 TMG verstößt.
+
 Eine Beispielkonfiguration für einen vHost:
 
 ```
@@ -25,7 +27,7 @@ Eine Beispielkonfiguration für einen vHost:
 # URL params will not be logged, thus they include user authentication
 # data, which should not be in logs.
 #
-log_format cocal '$remote_addr [$time_local] "$request_method $uri" '
+log_format cocal '$remote_addr_anonym [$time_local] "$request_method $uri" '
 	'$status $body_bytes_sent "$http_user_agent"';
 
 # Rate limiting
@@ -45,6 +47,12 @@ server {
 
 
 	# Logging
+	#
+	# Last byte of IPv4 will be truncated.
+	if ($remote_addr ~ (\d+).(\d+).(\d+).(\d+)) {
+		set $remote_addr_anonym $1.$2.$3.0;
+	}
+
 	access_log /var/log/nginx/campus/access.log cocal;
 	error_log /var/log/nginx/campus/error.log;
 
