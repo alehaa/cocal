@@ -74,8 +74,7 @@ function curl_request($curl_handle, $url, $method = "GET", $params = array())
 	$options = array(
 		CURLOPT_URL => $url,
 		CURLOPT_FOLLOWLOCATION => true,
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_HEADER => true
+		CURLOPT_RETURNTRANSFER => true
 	);
 
 	// set params for method

@@ -20,9 +20,21 @@ Bei der Einrichtung deines vHosts für CoCal solltest du zwei Dinge beachten:
 Eine Beispielkonfiguration für einen vHost:
 
 ```
-log_format cocal '$remote_addr - $remote_user [$time_local] '
-	'"$request_method $uri" $status $body_bytes_sent '
-	'"$http_referer" "$http_user_agent"';
+# Log format for CoCal
+#
+# URL params will not be logged, thus they include user authentication
+# data, which should not be in logs.
+#
+log_format cocal '$remote_addr [$time_local] "$request_method $uri" '
+	'$status $body_bytes_sent "$http_user_agent"';
+
+# Rate limiting
+#
+# To avoid users to abuse this service, only one request per minute
+# should be allowed for calendar.php.
+#
+limit_req_zone $binary_remote_addr zone=cocal:1m rate=1r/m;
+
 
 server {
 	# listen on all IPv4 and IPv6 interfaced on port 443
@@ -31,11 +43,24 @@ server {
 	# the name of our subdomain
 	server_name cocal.example.com;
 
+
 	# Logging
-	# The query parameters must not be logged, because they
-	# include the username and password of the users.
-	access_log /var/log/nginx/cocal/access.log cocal;
-	error_log /var/log/nginx/cocal/error.log;
+	access_log /var/log/nginx/campus/access.log cocal;
+	error_log /var/log/nginx/campus/error.log;
+
+	# favicon.ico
+	location = /favicon.ico {
+		log_not_found off;
+		access_log off;
+	}
+
+	# robots.txt
+	location = /robots.txt {
+		allow all;
+		log_not_found off;
+		access_log off;
+	}
+
 
 	# TLS settings
 	ssl on;
@@ -49,6 +74,17 @@ server {
 	# index sites & autoindex
 	index index.html index.htm index.php;
 	autoindex on;
+
+
+	# apply rate limiting
+	location ~ /calendar.php {
+		limit_req zone=cocal burst=3;
+
+		fastcgi_pass unix:/var/run/php5-fpm.sock;
+		fastcgi_index index.php;
+		include fastcgi_params;
+	}
+
 
 	# fastcgi settings
 	location ~ .php$ {
@@ -90,4 +126,5 @@ CoCal ist unter der freien [GPLv3](http://www.gnu.org/licenses/gpl-3.0.en.html) 
 ## Copyright
 
 Copyright 2011-2015 [Steffen Vogel](http://www.steffenvogel.de/)
+
 Copyright 2015 [Alexander Haase](mailto:alexander.haase@rwth-aachen.de)
