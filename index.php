@@ -47,7 +47,7 @@
 	</nav>
 
 	<div class="container">
-		<h1 id="home">CoCal <small>CAMPUS-Office Kalender Sync Service</small></h1>
+		<h1 id="home">CoCal <small>CAMPUS-Office Calender Sync Service</small></h1>
 		<p>
 			F&uuml;r die einfache Integration von CAMPUS-Office in deinen
 			Kalender kannst du jetzt einfach den CoCal nutzen um dir den
