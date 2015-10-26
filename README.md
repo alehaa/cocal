@@ -53,7 +53,7 @@ server {
 		set $remote_addr_anonym $1.$2.$3.0;
 	}
 
-	access_log /var/log/nginx/campus/access.log cocal;
+	access_log off;
 	error_log /var/log/nginx/campus/error.log;
 
 	# favicon.ico
@@ -91,6 +91,8 @@ server {
 		fastcgi_pass unix:/var/run/php5-fpm.sock;
 		fastcgi_index index.php;
 		include fastcgi_params;
+
+		access_log /var/log/nginx/campus/access.log cocal;
 	}
 
 
