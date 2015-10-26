@@ -108,7 +108,12 @@ foreach ($files as $file) {
 	if (!isset($conf['name']))
 		continue;
 
-	echo "<option value=\"$val\">".$conf['name']."</option>\n";
+
+	$selected = false;
+	if (isset($_GET['provider']) && ($_GET['provider'] == $val))
+		$selected = true;
+
+	printf("<option value=\"%s\"%s>%s</option>\n", $val, $selected ? "selected" : "", $conf['name']);;
 }
 ?>
 					</select>
