@@ -87,15 +87,31 @@
 
 		<h1 id="generator">CoCal nutzen</h1>
 		<p>
-			Du willst CoCal nutzen? F&uuml;lle einfach das folgende Formular
-			aus, um deine URL zu generieren.
+			Du willst CoCal nutzen? W&auml;hle einfach deine Hochschule aus und
+			trage deine CAMPUS-Anmeldedaten ein, um deine URL zu generieren.
 		</p>
 
 		<form class="form-horizontal" id="cocal_generator">
 			<div class="form-group">
-				<label for="cocal_url" class="col-sm-2 control-label">Campus URL</label>
+				<label for="cocal_url" class="col-sm-2 control-label">Hochschule</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="cocal_url" placeholder="campus.deineuni.de" <?php if(isset($_GET['co'])) echo "value=\"".$_GET['co']."\"";?>>
+					<select class="form-control" id="cocal_provider">
+<?php
+$files = scandir("./config");
+foreach ($files as $file) {
+	if ($file[0] == '.')
+		continue;
+
+	$val = basename("./config/".$file, ".json");
+
+	$conf = json_decode(file_get_contents("./config/".$file), true);
+	if (!isset($conf['name']))
+		continue;
+
+	echo "<option value=\"$val\">".$conf['name']."</option>\n";
+}
+?>
+					</select>
 				</div>
 			</div>
 			<div class="form-group">

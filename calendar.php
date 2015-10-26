@@ -88,10 +88,6 @@ function curl_request($curl_handle, $url, $method = "GET", $params = array())
 	}
 
 	// set all options
-	echo "<pre>";
-	print_r($options);
-	echo "</pre>";
-
 	if (!curl_setopt_array($curl_handle, $options))
 		error(500, "cURL optionen konnten nicht gesetzt werden.");
 
@@ -124,12 +120,16 @@ unset($cipher);
 
 
 /* Build CAMPUS office base URL with GET variable co. Per default HTTPS is used,
- * which should not be changed.
+ * which should not be changed. Configuration for the individual CAMPUS office
+ * will be loaded from file config/<provider>.json.
  */
-if (!isset($_GET['co']))
+if (!isset($_GET['provider']))
 	error(400, "Parameter 'co' nicht angegeben!");
 
-$campus_url = "https://".$_GET['co'];
+$config = json_decode(file_get_contents("./config/".$_GET['provider'].".json"),
+                      true);
+if (!is_array($config) || empty($config))
+	error(500, "Konfiguration konnte nicht geladen werden.");
 
 
 // init cURL handle.
@@ -143,12 +143,12 @@ if ($ch == false)
  * login is specific for the FH Aachen University of applied sciences.
  */
 $login = array(
-	"u" => $campus_user,
-	"p" => $campus_passwd,
-	"login" => "Login"
+	$config['login']['username'] => $campus_user,
+	$config['login']['password'] => $campus_passwd,
+	$config['login']['login']['label'] => $config['login']['login']['value']
 );
-curl_request($ch, $campus_url."/views/campus/search.asp", "POST", $login);
 
+curl_request($ch, $config['login']['url'], "POST", $login);
 
 /* Request calendar.
  * Default timeslot is 1 week in past and half year in future.
@@ -159,12 +159,11 @@ $calParams = array(
 	"enddt"   => strftime("%d.%m.%Y %H:%M:%S", time() + 6*31*24*60*60)
 );
 
-$calendar = curl_request($ch, $campus_url."/views/calendar/iCalExport.asp",
-                         "GET", $calParams);
+$calendar = curl_request($ch, $config['calendar'], "GET", $calParams);
 
 // print calendar
 header("Content-type: text/calendar; charset=utf-8");
 header("Content-Disposition: inline; filename=calendar.ics");
 echo($calendar);
 
- ?>
+?>
