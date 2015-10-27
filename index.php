@@ -26,7 +26,21 @@
 	<link href="css/cocal.css" rel="stylesheet">
 	<script src="js/cocal.js"></script>
 	<script>
-		var cocal_proxy_url = "<?php echo(((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME']); ?>";
+<?php
+$url = "";
+
+if (!empty($_SERVER['HTTPS']))
+	$url .= "https";
+else
+	$url .= "http";
+
+$url .= "://".$_SERVER['SERVER_NAME'];
+
+$dir = basename(dirname($_SERVER[PHP_SELF]));
+if (!empty($dir))
+	$url .= "/".$dir;
+?>
+		var cocal_proxy_url = "<?php echo($url); ?>";
 	</script>
 </head>
 
