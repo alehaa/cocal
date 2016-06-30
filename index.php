@@ -36,7 +36,7 @@ else
 
 $url .= "://".$_SERVER['SERVER_NAME'];
 
-$dir = basename(dirname($_SERVER[PHP_SELF]));
+$dir = basename(dirname($_SERVER['PHP_SELF']));
 if (!empty($dir))
 	$url .= "/".$dir;
 ?>
