@@ -123,7 +123,7 @@ unset($cipher);
  * will be loaded from file config/<provider>.json.
  */
 if (!isset($_GET['provider']))
-	error(400, "Parameter 'co' nicht angegeben!");
+	error(400, "Parameter 'provider' nicht angegeben!");
 
 $config = json_decode(file_get_contents("./config/".$_GET['provider'].".json"),
                       true);
