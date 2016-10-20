@@ -1,0 +1,7 @@
+<?php
+/**
+ * This is an automatically generated file. Manual modifications may be overwritten. Handle with care.
+ * Last modification: dd.mm.YYYY HH:ii:ss
+ */
+define('CRYPTPASSWORD', base64_decode('XXXXXXX'));
+define('URLPASSWORD', 'XXXXXXX');
