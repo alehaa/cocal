@@ -1,3 +1,15 @@
+<?php
+require_once('includes.php');
+if (file_exists('config.php') && file_exists('install.php')) {
+	error(500, "Vor dem Benutzen von Cocal muss die install.php file gelöscht werden.");
+}
+else if (!file_exists('config.php')) {
+	error(500, "Vor dem Benutzen von Cocal muss Cocal <a href='install.php'>installiert werden</a>.");
+}
+require_once('config.php');
+$token = randomString(20);
+$_SESSION['cocalRequestToken'] = $token;
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,6 +53,7 @@ if (!empty($dir))
 	$url .= "/".$dir;
 ?>
 		var cocal_proxy_url = "<?php echo($url); ?>";
+		var securityCode = "<?php echo URLPASSWORD; ?>";
 	</script>
 </head>
 
@@ -133,6 +146,7 @@ foreach ($files as $file) {
 					</select>
 				</div>
 			</div>
+			<input type="hidden" id="cocal_token" value="<?php echo $token ?>">
 			<div class="form-group">
 				<label for="cocal_user" class="col-sm-2 control-label">Benutzername</label>
 				<div class="col-sm-4">
