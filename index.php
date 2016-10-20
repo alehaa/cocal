@@ -89,9 +89,8 @@ if (!empty($dir))
 		<p>
 			Der generierte Link ist f&uuml;r dich <b>pers&ouml;nlich</b>
 			gedacht. Er enth&auml;lt deine pers&ouml;nlichen CAMPUS-Office
-			Anmeldedaten und gew&auml;hrt jedem Zugriff auf deinen CAMPUS-Office
-			Account. Bewahre ihn daher sicher auf, oder generiere ihn am besten
-			nur, wenn du ihn gerade brauchst und schreibe ihn nicht auf.
+			Anmeldedaten in verschlüsselter Form und gew&auml;hrt jedem Zugriff auf deinen CAMPUS-Office
+			Kalender. Der Link ist ohne Gegenschlüssel (Server-Intern) unbrauchbar. Bewahre ihn jedoch trotzdem sicher auf.
 		</p>
 		<p>
 			Solltest du den Link versehentlich weitergegeben haben oder ein
@@ -101,15 +100,24 @@ if (!empty($dir))
 
 		<h2>Datenschutz</h2>
 		<p>
-			Auf dem CoCal Server werden keine Passwort-Hashes gespeichert. Auch
+			Auf dem CoCal Server werden keine persönlichen Passwort-Hashes gespeichert. Es wird lediglich ein
+			Entschlüsselungs-Hash gespeichert, der komplett unabhängig von deinem Passwort im Vorhinein generiert wurde. Auch
 			wenn von diesem Server Daten geklaut werden, kann dein Passwort also
-			nicht geklaut werden.<br/>
+			nicht geklaut werden. Man braucht immer Passwort-Hash und Entschlüsselungs-Hash, um deine Anmeldedaten zu
+			Klartext zu entschlüsseln.<br/>
 
 			Wenn du dem Admin des Servers jedoch nicht traust, dass er
 			sorgf&auml;ltig mit deinen Daten umgeht, kannst du CoCal auch
 			einfach <a href="https://github.com/alehaa/cocal">auf deinem
 			eigenen Server hosten.</a>
 		</p>
+		<h2>Alte Version</h2>
+		<p>Damit die alten Links, die du in der Vergangenheit generiert hast mit der aktuellen Version auch noch funktionieren,
+		ist diese Cocal-Version backwards compatible. Allerdings muss man <b>unbedingt beachten</b>, dass die <b>älteren Links</b> noch
+		deine kompletten Anmeldedaten <b>ohne Verschlüsselung</b> beinhalten. Jeder, der deinen alten Link kennt, kennt automatisch deine
+		Anmeldedaten.<br>
+		Aktuell werden nur noch verschlüsselte Links generiert. Wenn du dir also nicht sicher bist,
+			ob du einen neuen oder alten Link hast, generiere dir einen neuen! (Neue Links enthalten die Zeichenkette <code>&v=2</code>.)</p>
 
 
 		<h1 id="generator">CoCal nutzen</h1>
@@ -176,8 +184,9 @@ foreach ($files as $file) {
 				Dein pers&ouml;nlicher Link f&uuml;r dein Kalender-Abonement:<br/>
 				<a id="generator_url_link"></a><br/>
 				<br/>
-				<b>Achtung:</b> Gebe diesen Link an <b>niemanden</b> weiter, da
-				er deine pers&ouml;nlichen CAMPUS-Anmeldedaten enth&auml;lt!
+				Dieser Link enthällt deine <b>persönlichen CAMPUS-Anmeldedaten</b>. Jedoch wurden diese zuvor verschlüsselt,
+				damit deine Daten ohne Gegenschlüssel nicht entschlüsselbar sind.
+				Wir empfehlen trotzdem, dass du beim Verlust des Links deine <b>Anmeldedaten änderst</b>.
 			</p>
 		</div>
 
@@ -190,8 +199,9 @@ foreach ($files as $file) {
 
 		<h1 id="contribute">Mitwirken</h1>
 		<p>
-			CoCal wurde von <a href="http://www.steffenvogel.de">Steffen Vogel</a>
-			und <a href="https://github.com/alehaa">Alexander Haase</a>
+			CoCal wurde von <a href="http://www.steffenvogel.de" target="_blank">Steffen Vogel</a>,
+			<a href="https://github.com/alehaa" target="_blank">Alexander Haase</a> und
+			<a href="https://github.com/Lozik" target="_blank">Loïc Beurlet</a>
 			geschrieben.
 		</p>
 		<p>
