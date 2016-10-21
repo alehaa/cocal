@@ -7,7 +7,10 @@ CoCal ist ein Calender Sync Service für CAMPUS-Office. Mithilfe von CoCal kann 
 
 CoCal benötigt einen Webserver mit PHP sowie deren cURL-Erweiterung. Alles weitere ist in diesem Repository enthalten.
 
-CoCal muss nicht gesondert eingerichtet werden. Lade es einfach in das Verzeichnis deines Webservers und du kannst loslegen.
+CoCal muss zusätzlich noch installiert werden um einen Verschlüsselungs-Key zu generieren. Lade es einfach in das Verzeichnis deines Webservers und öffne die Seite ```install.php``` in einem Browser und klicke dort auf den Install-Button.
+Nach der Installation muss die Installations-Datei noch gelöscht werden und schon kannst du Cocal benutzen.
+
+Beachte, dass PHP genügend Rechte hat, um im Hauptverzeichnis Dateien anzulegen und hinein zu schreiben. Dies ist notwendig, damit die Config-File angelegt werden kann.
 
 
 ### nginx-Konfiguration
@@ -138,3 +141,5 @@ CoCal ist unter der freien [GPLv3](http://www.gnu.org/licenses/gpl-3.0.en.html) 
 Copyright 2011-2015 [Steffen Vogel](http://www.steffenvogel.de/)
 
 Copyright 2015 [Alexander Haase](mailto:alexander.haase@rwth-aachen.de)
+
+Copyright 2016 [Loïc Beurlet](https://github.com/Lozik)
