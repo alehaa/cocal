@@ -1,0 +1,62 @@
+/* This file is part of CoCal.
+ *
+ * CoCal is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * CoCal is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see
+ *
+ *  http://www.gnu.org/licenses/
+ *
+ *
+ * Copyright (C)
+ *  2011-2013 Steffen Vogel <post@steffenvogel.de>
+ *  2015-2017 Alexander Haase <ahaase@alexhaase.de>
+ */
+
+/* Color definitions.
+ *
+ * The following colors will be used in the following definitions and need to be
+ * defined first.
+ */
+@background: #e4e4e4;
+
+
+/* General settings.
+ *
+ * The following classes are required for the general setup of the page and its
+ * main elements.
+ */
+body {
+  background-color: @background;
+
+  /* These paddings are required to get a spacing between the body's text and
+   * the navbars for header and footer. Otherwise the text will be hidden by
+   * them. */
+  padding-top: 60px;
+  padding-bottom: 50px;
+}
+
+.navbar-cocal {
+  background-color: fade(@background, 90%);
+}
+
+* {
+  /* Disable the border radius for all elements to get sharp corners instead of
+   * rounded ones. */
+  border-radius: 0 !important
+}
+
+
+/* The alert class inside the a output panel needs special handling: By default
+ * a bottom margin would result in a large vertical space between the alert-box
+ * and the end of the panel. The following snippet will fix this. */
+#output .alert {
+  margin-bottom: 0 !important;
+}

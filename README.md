@@ -1,140 +1,48 @@
 # CoCal
 
-CoCal ist ein Calender Sync Service für CAMPUS-Office. Mithilfe von CoCal kann der CAMPUS-Office Kalender einfach in jede Anwendung integriert werden, die das iCal Format unterstüzt. So entfallen lästige manuelle Synchronisationen mit CAMPUS-Office.
+[![](https://img.shields.io/github/issues-raw/alehaa/cocal.svg?style=flat-square)](https://github.com/alehaa/cocal/issues)
+[![GPL license](http://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](LICENSE)
+
+The original intention of CoCal was to provide a proxy service between CAMPUS
+Office servers and several devices to get an updating calendar feed. However,
+recent versions of CAMPUS Office made the integration more easy. Event if it is
+not officially supported yet, CoCal helps users to get the right URL to get an
+updating calendar feed for their schedule.
 
 
-## Einrichtung
+## Installation
 
-CoCal benötigt einen Webserver mit PHP sowie deren cURL-Erweiterung. Alles weitere ist in diesem Repository enthalten.
+No special installation is required. Just unpack the packed
+[release](https://github.com/alehaa/cocal/releases) into your webserver's root.
 
-CoCal muss nicht gesondert eingerichtet werden. Lade es einfach in das Verzeichnis deines Webservers und du kannst loslegen.
-
-
-### nginx-Konfiguration
-
-Bei der Einrichtung deines vHosts für CoCal solltest du zwei Dinge beachten:
-
-1. Nutze TLS! Bei jeder Synchronisation werden Anmeldedaten übergeben, also solltest du die Daten deiner Benutzer entsprechend absichern. Eine Nutzung über unverschlüsseltes HTTP solltest du nicht anbieten.
-2. Schalte das Logging für URL-Parameter ab! Die Anmeldedaten werden als URL-Parameter übergeben, also sollten diese nicht in irgendwelchen Logs abgespeichert sein.
-
-Zudem solltest du die IP der Nutzer anonymisieren oder gar nicht loggen, da dies sonst gegen §15 TMG verstößt.
-
-Eine Beispielkonfiguration für einen vHost:
-
+Developers using the source repository need to compile the
+[main.less](css/main.less):
 ```
-# Log format for CoCal
-#
-# URL params will not be logged, thus they include user authentication
-# data, which should not be in logs.
-#
-log_format cocal '$remote_addr_anonym [$time_local] "$request_method $uri" '
-	'$status $body_bytes_sent "$http_user_agent"';
-
-# Rate limiting
-#
-# To avoid users to abuse this service, only one request per minute
-# should be allowed for calendar.php.
-#
-limit_req_zone $binary_remote_addr zone=cocal:1m rate=1r/m;
-
-
-server {
-	# listen on all IPv4 and IPv6 interfaced on port 443
-	listen 443;
-
-	# the name of our subdomain
-	server_name cocal.example.com;
-
-
-	# Logging
-	#
-	# Last byte of IPv4 will be truncated.
-	if ($remote_addr ~ (\d+).(\d+).(\d+).(\d+)) {
-		set $remote_addr_anonym $1.$2.$3.0;
-	}
-
-	access_log off;
-	error_log /var/log/nginx/campus/error.log;
-
-	# favicon.ico
-	location = /favicon.ico {
-		log_not_found off;
-		access_log off;
-	}
-
-	# robots.txt
-	location = /robots.txt {
-		allow all;
-		log_not_found off;
-		access_log off;
-	}
-
-
-	# TLS settings
-	ssl on;
-	ssl_certificate /etc/ssl/localcerts/cocal.pem;
-	ssl_certificate_key /etc/ssl/private/cocal.key;
-
-
-	# root directory of webserver
-	root /srv/www/cocal;
-
-	# index sites & autoindex
-	index index.html index.htm index.php;
-	autoindex on;
-
-
-	# apply rate limiting
-	location ~ /calendar.php {
-		limit_req zone=cocal burst=3;
-
-		fastcgi_pass unix:/var/run/php5-fpm.sock;
-		fastcgi_index index.php;
-		include fastcgi_params;
-
-		access_log /var/log/nginx/campus/access.log cocal;
-	}
-
-
-	# fastcgi settings
-	location ~ .php$ {
-		fastcgi_pass unix:/var/run/php5-fpm.sock;
-		fastcgi_index index.php;
-		include fastcgi_params;
-	}
-}
+lessc css/main.less > css/main.css
 ```
 
 
-## Mitwirken
+## Contribute
 
-Wenn du an CoCal mitwirken willst, kannst du dieses Repository einfach klonen und Änderungen als Pull-Request einreichen.
+Everyone is welcome to contribute. Simply fork this repository, make your
+changes *in an own branch* and create a pull-request for your changes. Please
+send only one change per pull-request.
 
-Falls du das CAMPUS-Office deiner Universität hinzufügen möchtest, musst du lediglich eine JSON-Datei im Ordner ```config``` anlegen, welche das folgende Format hat:
-```JSON
-{
-	"name": "Name der Universität",
-	"login": {
-		"username": "ID des Username-Feldes in der Anmeldemaske",
-		"password": "ID des Passwort-Feldes in der Anmeldemaske",
-		"login": {
-			"label": "ID des Login-Buttons in der Anmeldemaske",
-			"value": "Value des Login-Buttons in der Anmeldemaske"
-		},
-		"url": "URL der Anmelseite"
-	},
-	"calendar": "URL des Kalenders"
-}
-```
+You found a bug? Please
+[file an issue](https://github.com/alehaa/cocal/issues/new) and include all
+information to reproduce the bug.
 
 
-## Lizenz
+## License
 
-CoCal ist unter der freien [GPLv3](http://www.gnu.org/licenses/gpl-3.0.en.html) lizenziert.
+CoCal is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
+CoCal is distributed in the hope that it will be useful, but **WITHOUT ANY
+WARRANTY**; without even the implied warranty of **MERCHANTABILITY** or
+**FITNESS FOR A PARTICULAR PURPOSE**. A Copy of the GPL can be found in the
+[LICENSE](LICENSE) file.
 
-## Copyright
-
-Copyright 2011-2015 [Steffen Vogel](http://www.steffenvogel.de/)
-
-Copyright 2015 [Alexander Haase](mailto:alexander.haase@rwth-aachen.de)
+Copyright &copy; 2011-2013 [Steffen Vogel](http://www.steffenvogel.de/)<br/>
+Copyright &copy; 2015-2017 [Alexander Haase](mailto:alexander.haase@rwth-aachen.de)
