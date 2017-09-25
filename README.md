@@ -21,6 +21,9 @@ Developers using the source repository need to compile the
 lessc css/main.less > css/main.css
 ```
 
+If `make` is installed, the [Makefile](Makefile) may be used by simply running
+`make`.
+
 
 ## Contribute
 
