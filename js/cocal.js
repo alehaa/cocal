@@ -63,7 +63,8 @@ function cocal_generate_url()
    * of the URL generator form. */
   var url = 'https://' + $('#cocal_server').val()
           + '/views/calendar/iCalExport.asp'
-          + '?u=' + $('#username').val() + '&p=' + $('#password').val()
+          + '?u=' + encodeURIComponent($('#username').val())
+          + '&p=' + encodeURIComponent($('#password').val())
           + '&startdt=' + cocal_date_offset(-30).toLocaleDateString('de')
           + '&enddt=' + cocal_date_offset(3650).toLocaleDateString('de');
 
